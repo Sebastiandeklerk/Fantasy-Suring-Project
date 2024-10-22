@@ -5,3 +5,5 @@ The second excel document, named ’Historical Event surfer stats’, had 11 she
 Exploratory data analysis was conducted on the 2017 season to build MILP models and develop team-selection strategies. 
 These models were tested on the 2018 WCT season. 
 The 2014-2016 WCT seasons were used as historical data in determining the important variables that predict surfer performance in the 2017 WCT season.
+
+Note all data was anonymised due to ethical constraints

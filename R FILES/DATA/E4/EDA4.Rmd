@@ -1,0 +1,40 @@
+---
+title: "ED14"
+author: "Aiden Harris, HRRAID003"
+date: "2024-08-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readxl)
+library(dplyr)
+library(ggcorrplot)
+library(caret)
+library(car)
+Data<-read_excel("Event4.xlsx", sheet = "Surfer Stats - Event 4")
+Data<-Data[,-c(1,2,3,5,11)]
+Data<-na.omit(Data)
+Data<-Data[-c(25,33,34),]
+Data$`Surfer Stance`<-as.factor(Data$`Surfer Stance`)
+Data$`National advantage`<-as.factor(Data$`National advantage`)
+Data$Nationality<-as.factor(Data$Nationality)
+Data$`Previous 3 Event Points`<-as.numeric(Data$`Previous 3 Event Points`)
+Data<-Data[,-c(8)]
+LinearModel<-lm(`Actual Points`~., data = Data)
+summary(LinearModel)
+```
+
+```{r}
+library(glmnet)
+x<-model.matrix(`Actual Points`~., Data)[,-1]
+dim(x)
+y<-Data$`Actual Points`
+
+lassoMod<-cv.glmnet(x,y,alpha=1)
+coef(lassoMod, s="lambda.min")
+```
+

@@ -1,0 +1,90 @@
+---
+title: "EDA_EVENT1"
+author: "Aiden Harris, HRRAID003"
+date: "2024-08-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readxl)
+library(dplyr)
+library(ggcorrplot)
+library(caret)
+library(car)
+Data<-read_excel("Event1.xlsx", sheet = "Surfer Stats - Event 1 proper")
+```
+
+```{r}
+Exploredata<-Data[,-c(1,2,3,4)]
+Exploredata$Experience<-as.factor(Exploredata$Experience)
+LinearModel<-lm(`Actual Points`~., data = Exploredata)
+summary(LinearModel)
+
+Filter1<-Exploredata%>%filter(Exploredata$`Average Heat Score`!=0, Exploredata$`2016 Heats surfed`!=0, Exploredata$`2015 Heats Surfed`!=0, Exploredata$`2014 Heats Surfed`!=0)
+Filter1$`National advantage`<-as.factor(Filter1$`National advantage`)
+Filter1$Nationality<-as.factor(Filter1$Nationality)
+
+LM1<-lm(`Actual Points`~., data = Filter1)
+summary(LM1)
+```
+
+```{r}
+cor(Filter1)
+zero_var_cols <- nearZeroVar(Filter1)
+correlData<-Filter1[,-c(7,8,9,29)]
+cor_matrix <- cor(correlData)
+variable_name <- "Actual Points"
+
+cor_with_variable <- cor_matrix[, variable_name]
+high_cor <- which(abs(cor_matrix) == 1, arr.ind = TRUE)
+
+threshold <- 0.995
+
+# Identify columns where any correlation exceeds the threshold
+columns_to_keep <- apply(cor_matrix, 2, function(x) any(abs(x) > threshold))
+```
+
+```{r}
+library(glmnet)
+x<-model.matrix(`Actual Points`~., Filter1)[,-1]
+y<-Filter1$`Actual Points`
+
+lassoMod<-cv.glmnet(x,y,alpha=1)
+coef(lassoMod, s="lambda.min")
+```
+
+```{r}
+pca_result <- prcomp(correlData[, -c(26)], scale. = TRUE)
+summary(pca_result)
+```
+
+```{r}
+correlationDF2<-cor(correlData)
+FA<-factanal(covmat = cor_matrix, rotation="none", factors = 2)
+varimax(loadings(FA))
+FA <- factanal(correlData, factors = 2, rotation = "varimax")
+```
+
+```{r}
+Filter2 <- Exploredata %>%
+  filter(rowSums(Exploredata[, c("Average Heat Score", "2016 Heats surfed", "2015 Heats Surfed", "2014 Heats Surfed")] == 0) != 4)
+Filter2$`National advantage`<-as.factor(Filter1$`National advantage`)
+Filter2$Nationality<-as.factor(Filter1$Nationality)
+```
+
+```{r}
+correlData2<-Filter2[,-c(7,8,9,29)]
+cor_matrix2 <- cor(correlData2)
+FA<-factanal(covmat = cor_matrix2, rotation="none", factors = 2)
+varimax(loadings(FA))
+```
+
+
+
+
+
+

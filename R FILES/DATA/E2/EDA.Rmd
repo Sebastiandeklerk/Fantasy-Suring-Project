@@ -1,0 +1,81 @@
+---
+title: "EDA"
+author: "Aiden Harris, HRRAID003"
+date: "2024-07-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readxl)
+library(dplyr)
+library(ggcorrplot)
+Data<-read_excel("DataNew.xlsx", sheet = "Surfer Stats - Event 2")
+
+data<-Data[,-c(1,2,3,4,10)]
+str(data)
+data$`Local Surfer`<-as.factor(data$`Local Surfer`)
+data$`National advantage`<-as.factor(data$`National advantage`)
+data$Nationality<-as.factor(data$Nationality)
+CorrelaData<-data[,-c(6,7,8,27)]
+Correlations<-cor(CorrelaData)
+corrplot::corrplot(Correlations)
+```
+
+```{r}
+LinearModel<-lm(`Actual points`~., data = data)
+summary(LinearModel)
+```
+
+```{r}
+NonSIng<-data[, -c(8,22, 27,28)]
+NS1<-data[,-c(8,22)]
+LM1<-lm(`Actual points`~., data = NS1)
+LM2<-lm(`Actual points`~., data = NonSIng)
+SLM1<- summary(LM1)
+
+Sl2<-summary(LM2)
+```
+
+```{r}
+Correlations[,"Actual points"]
+```
+
+
+```{r}
+p_values <- Sl2$coefficients[, "Pr(>|t|)"]
+alpha<-0.05
+
+significant_vars <- names(p_values[p_values < alpha])
+significant_vars <- significant_vars[significant_vars != "(Intercept)"]  # Remove intercept if included
+
+significant_vars_indexes <- match(significant_vars, names(NonSIng))
+
+# Subset the original data frame to include only significant variables
+
+sigIndexes<-c(3,9,10,11,12,16:21)
+df_significant <- NonSIng[, sigIndexes]
+str(df_significant)
+```
+
+```{r}
+correlationDF<-cor(df_significant)
+df_significant2<-df_significant[,-c(2,3)]
+correlationDF2<-cor(df_significant2)
+FA<-factanal(covmat = correlationDF2, rotation="none", factors = 2)
+varimax(loadings(FA))
+```
+
+```{r}
+ggplot(data, aes(x))
+summary(data$`2016 Score`)
+```
+
+
+
+
+
+

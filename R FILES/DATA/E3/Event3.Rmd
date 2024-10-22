@@ -1,0 +1,47 @@
+---
+title: "EDA3"
+author: "Aiden Harris, HRRAID003"
+date: "2024-08-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readxl)
+library(dplyr)
+library(ggcorrplot)
+library(caret)
+library(car)
+Data<-read_excel("Event3.xlsx", sheet = "Surfer Stats - Event 3")
+Data<-Data[,-c(3,5,7,11)]
+```
+
+```{r}
+ExploreData<-Data[,-c(1,2)]
+ExploreData$`Surfer stance`<-as.factor(ExploreData$`Surfer stance`)
+ExploreData$`National advantage`<-as.factor(ExploreData$`National advantage`)
+ExploreData$Nationality<-as.factor(ExploreData$Nationality)
+LinearModel<-lm(`Actual points`~., data = ExploreData)
+summary(LinearModel)
+
+Filter1<-ExploreData%>%filter(ExploreData$`Average Heat Score`!=0, ExploreData$`2016 Heats surfed`!=0, ExploreData$`2015 Heats Surfed`!=0, ExploreData$`2014 Heats Surfed`!=0)
+
+LM1<-lm(`Actual points`~., data = Filter1)
+summary(LM1)
+```
+
+```{r}
+library(glmnet)
+x<-model.matrix(`Actual points`~., Filter1)[,-1]
+dim(x)
+y<-Filter1$`Actual points`
+
+lassoMod<-cv.glmnet(x,y,alpha=1)
+coef(lassoMod, s="lambda.min")
+```
+
+
+

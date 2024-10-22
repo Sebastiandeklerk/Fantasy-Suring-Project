@@ -1,0 +1,57 @@
+---
+title: "E3"
+author: "Aiden Harris, HRRAID003"
+date: "2024-09-16"
+output: html_document
+---
+```{r setup, include=FALSE}
+library(readxl)
+library(dplyr)
+library(ggcorrplot)
+library(caret)
+library(car)
+Data<-read_excel("Event3.xlsx", sheet = "Surfer Stats - Event 3")
+Data<-Data[,-c(1,2,3,5,7,11)]
+Data$`Previous 2 Event Points`<-as.numeric(Data$`Previous 2 Event Points`)
+Data[39,23]<-0
+Data[40,23]<-0
+```
+
+
+```{r}
+Data<-na.omit(Data, cols="Surfer")
+DataTrain<-subset(Data, Data$`2015 Placement`!=99)%>%subset(`2016 Placement`!=99)%>%subset(`Actual points`>0)
+```
+
+```{r}
+library(glmnet)
+x<-model.matrix(`Actual points`~., DataTrain)[,-1]
+dim(x)
+y<-DataTrain$`Actual points`
+
+lassoMod<-cv.glmnet(x,y,alpha=1)
+coef(lassoMod, s="lambda.min")
+```
+
+```{r}
+x1<-model.matrix(`Actual points`~., Data)[,-1]
+dim(x1)
+y1<-Data$`Actual points`
+
+lassoMod1<-cv.glmnet(x1,y1,alpha=1)
+coef(lassoMod1, s="lambda.min")
+```
+#Linear Modelling
+```{r}
+LM1<-lm(`Actual points`~., data = Data)
+summary(LM1)
+```
+
+```{r}
+x1<-model.matrix(`Actual points`~., Data)[,-1]
+dim(x1)
+y1<-Data$`Actual points`
+
+lassoMod1<-cv.glmnet(x1,y1,alpha=0.5)
+coef(lassoMod1, s="lambda.min")
+```

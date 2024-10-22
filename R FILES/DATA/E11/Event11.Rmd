@@ -1,0 +1,50 @@
+---
+title: "Event11"
+author: "Aiden Harris, HRRAID003"
+date: "2024-09-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(readxl)
+library(dplyr)
+library(ggcorrplot)
+library(caret)
+library(car)
+Data<-read_excel("Event11.xlsx", sheet = "Surfer Stats - Event 11")
+Data<-Data[,-c(1,2,5)]
+Data$`Previous 10 Event Points`<-as.numeric(Data$`Previous 10 Event Points`)
+Data$`Previous 10 heat average`<-as.numeric(Data$`Previous 10 heat average`)
+Data<-subset(Data, !is.na(`Actual Points`))
+Data[35,21]<-0
+Data[36,21]<-0
+```
+
+
+```{r}
+DataTrain<-subset(Data, Data$`2016 Placement`!=99)%>%subset(`Actual Points`>0)
+```
+
+```{r}
+library(glmnet)
+x<-model.matrix(`Actual Points`~., DataTrain)[,-1]
+dim(x)
+y<-DataTrain$`Actual Points`
+
+lassoMod<-cv.glmnet(x,y,alpha=1)
+coef(lassoMod, s="lambda.min")
+```
+
+```{r}
+x1<-model.matrix(`Actual Points`~., Data)[,-1]
+dim(x1)
+y1<-Data$`Actual Points`
+
+lassoMod1<-cv.glmnet(x1,y1,alpha=1)
+coef(lassoMod1, s="lambda.min")
+```
+#Linear Modelling
+```{r}
+LM1<-lm(`Actual Points`~., data = Data)
+summary(LM1)
+```

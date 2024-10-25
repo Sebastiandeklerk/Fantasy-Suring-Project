@@ -7,3 +7,7 @@ These models were tested on the 2018 WCT season.
 The 2014-2016 WCT seasons were used as historical data in determining the important variables that predict surfer performance in the 2017 WCT season.
 
 Note all data was anonymised due to ethical constraints
+
+The final study is a pdf document titled 'Competitive Surfing Fantasy Team Selection'
+
+All R files and Mixed Integer Linear Programming Models (MILP) are attached in the R-files, 2017MILP and 2018MILP folders.
